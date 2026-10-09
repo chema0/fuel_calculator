@@ -1,0 +1,200 @@
+<Layouts.app flash={@flash}>
+  <section class="grid gap-8 lg:grid-cols-[minmax(0,1.34fr)_minmax(20rem,0.86fr)] lg:items-start">
+    <div class="min-w-0">
+      <div class="mb-8 max-w-2xl">
+        <p class="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">
+          Flight planning / Earth · Moon · Mars
+        </p>
+        <h1 class="font-display text-4xl font-semibold leading-tight tracking-[-0.055em] text-slate-950 sm:text-5xl">
+          Mission fuel calculator
+        </h1>
+        <p class="mt-3 max-w-xl text-base leading-7 text-slate-600">
+          Enter the spacecraft mass, then add each launch or landing in flight order. The fuel estimate updates as you edit.
+        </p>
+      </div>
+
+      <.form for={@form} id="mission-form" phx-change="validate" class="space-y-6">
+        <div class="panel p-5 sm:p-7">
+          <div class="mb-5 flex items-start gap-4">
+            <div class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
+              <.icon name="hero-cube-transparent" class="size-6" />
+            </div>
+            <div>
+              <h2 class="text-lg font-semibold tracking-tight text-slate-950">Spacecraft</h2>
+              <p class="mt-0.5 text-sm text-slate-500">
+                Equipment and payload mass, excluding fuel.
+              </p>
+            </div>
+          </div>
+          <div class="relative max-w-sm">
+            <.input
+              field={@form[:mass]}
+              id="spacecraft-mass"
+              type="number"
+              min="1"
+              step="1"
+              label="Mass before fuel"
+              class="h-14 w-full rounded-xl border border-slate-200 bg-white px-4 pr-14 text-lg font-semibold text-slate-950 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+              error_class="border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+            />
+            <span class="pointer-events-none absolute right-4 top-[2.65rem] text-sm font-semibold text-slate-400">
+              kg
+            </span>
+          </div>
+        </div>
+
+        <div class="panel overflow-hidden">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:px-7">
+            <div class="flex items-center gap-4">
+              <div class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+                <.icon name="hero-map" class="size-6" />
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold tracking-tight text-slate-950">Flight path</h2>
+                <p class="mt-0.5 text-sm text-slate-500">
+                  List launches and landings in travel order.
+                </p>
+              </div>
+            </div>
+            <span
+              id="step-count"
+              class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600"
+            >
+              {@step_count} {if @step_count == 1, do: "step", else: "steps"}
+            </span>
+          </div>
+
+          <div id="flight-steps" class="px-5 py-3 sm:px-7">
+            <.inputs_for :let={step_form} field={@form[:steps]}>
+              <div
+                id={"flight-step-#{step_form.index}"}
+                class="group relative grid gap-3 border-b border-slate-100 py-4 last:border-b-0 sm:grid-cols-[2.25rem_minmax(0,1fr)_minmax(0,1fr)_2.5rem] sm:items-center"
+              >
+                <div class="flex items-center gap-3 sm:block">
+                  <span class="flex size-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
+                    {step_form.index + 1}
+                  </span>
+                  <span class="text-sm font-semibold text-slate-500 sm:hidden">
+                    Step {step_form.index + 1}
+                  </span>
+                </div>
+                <.input
+                  field={step_form[:action]}
+                  id={"step-action-#{step_form.index}"}
+                  type="select"
+                  label="Action"
+                  options={[Launch: :launch, Land: :land]}
+                  class="h-12 w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none transition hover:border-slate-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  error_class="border-rose-400"
+                />
+                <.input
+                  field={step_form[:planet]}
+                  id={"step-planet-#{step_form.index}"}
+                  type="select"
+                  label="Planet"
+                  options={[Earth: :earth, Moon: :moon, Mars: :mars]}
+                  class="h-12 w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none transition hover:border-slate-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  error_class="border-rose-400"
+                />
+                <button
+                  id={"remove-step-#{step_form.index}"}
+                  type="button"
+                  phx-click="remove_step"
+                  phx-value-index={step_form.index}
+                  aria-label={"Remove step #{step_form.index + 1}"}
+                  class="absolute right-0 top-4 flex size-10 items-center justify-center rounded-xl text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500 sm:static"
+                >
+                  <.icon name="hero-trash" class="size-5" />
+                </button>
+              </div>
+            </.inputs_for>
+            <div :if={@step_count == 0} id="empty-flight-path" class="py-10 text-center">
+              <.icon name="hero-map-pin" class="mx-auto size-8 text-slate-300" />
+              <p class="mt-3 font-medium text-slate-700">Your flight path is empty.</p>
+              <p class="mt-1 text-sm text-slate-500">
+                Add a step to start planning your mission.
+              </p>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:px-7">
+            <button
+              id="add-step"
+              type="button"
+              phx-click="add_step"
+              class="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-white px-4 py-2.5 text-sm font-semibold text-teal-800 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-400 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500"
+            >
+              <.icon name="hero-plus" class="size-4" /> Add flight step
+            </button>
+          </div>
+        </div>
+      </.form>
+    </div>
+
+    <aside class="lg:sticky lg:top-8">
+      <div
+        id="fuel-result"
+        class="overflow-hidden rounded-[1.75rem] bg-slate-950 p-6 text-white shadow-[0_24px_70px_-24px_rgba(15,23,42,0.55)] sm:p-8"
+      >
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">
+              Calculated total
+            </p>
+            <h2 class="mt-2 text-xl font-semibold tracking-tight">Fuel required</h2>
+          </div>
+          <div class="flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-teal-200">
+            <.icon name="hero-fire" class="size-6" />
+          </div>
+        </div>
+
+        <div :if={@total != nil} id="fuel-total" class="mt-10" aria-live="polite">
+          <div class="flex items-baseline gap-2">
+            <span class="font-display text-6xl font-semibold tracking-[-0.07em] tabular-nums sm:text-7xl">
+              {format_number(@total)}
+            </span>
+            <span class="text-lg font-medium text-slate-400">kg</span>
+          </div>
+          <p class="mt-3 text-sm text-slate-400">
+            For all {@step_count} flight steps, including fuel weight.
+          </p>
+        </div>
+        <div :if={@total == nil} id="fuel-prompt" class="mt-10" aria-live="polite">
+          <p class="font-display text-3xl font-semibold tracking-tight">No estimate yet</p>
+          <p class="mt-3 text-sm leading-6 text-slate-400">
+            Enter a positive mass and add at least one valid flight step to see the estimate.
+          </p>
+        </div>
+
+        <div class="mt-10 border-t border-white/10 pt-5">
+          <p class="text-sm font-semibold text-slate-200">How this total is calculated</p>
+          <p class="mt-2 text-xs leading-5 text-slate-400">
+            Each step carries its own fuel. Earlier steps also carry the fuel needed for every later step.
+          </p>
+        </div>
+      </div>
+      <div class="mt-5 rounded-2xl border border-slate-200 bg-white/80 p-5 text-sm text-slate-600">
+        <h3 class="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+          Gravity used · m/s²
+        </h3>
+        <dl class="mt-4 grid grid-cols-3 gap-3">
+          <div>
+            <dt class="text-xs text-slate-500">Earth</dt>
+            <dd class="mt-1 font-semibold tabular-nums text-slate-900">9.807</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-slate-500">Moon</dt>
+            <dd class="mt-1 font-semibold tabular-nums text-slate-900">1.62</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-slate-500">Mars</dt>
+            <dd class="mt-1 font-semibold tabular-nums text-slate-900">3.711</dd>
+          </div>
+        </dl>
+        <p class="mt-4 border-t border-slate-100 pt-3 text-xs leading-5 text-slate-500">
+          Fuel is rounded down to whole kilograms at each calculation.
+        </p>
+      </div>
+    </aside>
+  </section>
+</Layouts.app>
