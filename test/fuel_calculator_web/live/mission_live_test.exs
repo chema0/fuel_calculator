@@ -66,12 +66,26 @@ defmodule FuelCalculatorWeb.MissionLiveTest do
 
     assert has_element?(view, "#fuel-prompt")
     refute has_element?(view, "#fuel-total")
+    assert has_element?(view, "#mission-form", "must be greater than 0")
 
     view
     |> form("#mission-form", mission: %{mass: "28801"})
     |> render_change()
 
     assert has_element?(view, "#fuel-total", "51,898")
+  end
+
+  test "recovers from an empty path when a maneuver is added", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    for _ <- 1..4 do
+      view |> element("#remove-step-0") |> render_click()
+    end
+
+    view |> element("#add-step") |> render_click()
+
+    assert has_element?(view, "#flight-step-0")
+    assert has_element?(view, "#fuel-total")
   end
 
   test "shows an empty path prompt after all steps are removed", %{conn: conn} do

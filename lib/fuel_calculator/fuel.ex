@@ -3,8 +3,9 @@ defmodule FuelCalculator.Fuel do
 
   alias FuelCalculator.Mission.Step
 
-  @gravity %{earth: 9.807, moon: 1.62, mars: 3.711}
-  @formula %{launch: {0.042, 33}, land: {0.033, 42}}
+  # Gravity and formula factors are stored as thousandths so rounding is exact.
+  @gravity %{earth: 9_807, moon: 1_620, mars: 3_711}
+  @formula %{launch: {42, 33}, land: {33, 42}}
 
   @doc """
   Returns the total fuel in kilograms for a validated mission.
@@ -39,5 +40,5 @@ defmodule FuelCalculator.Fuel do
   end
 
   defp required_fuel(mass, gravity, factor, offset),
-    do: floor(mass * gravity * factor - offset)
+    do: div(mass * gravity * factor, 1_000_000) - offset
 end

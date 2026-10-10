@@ -12,6 +12,17 @@ defmodule FuelCalculator.FuelTest do
     assert Fuel.step_fuel(40, %Step{action: :land, planet: :earth}) == 0
   end
 
+  test "formula floors exactly at the positive-fuel boundary" do
+    assert Fuel.step_fuel(80, step(:launch, :earth)) == 0
+    assert Fuel.step_fuel(81, step(:launch, :earth)) == 0
+    assert Fuel.step_fuel(83, step(:launch, :earth)) == 1
+  end
+
+  test "a very large mass does not lose precision or overflow a float" do
+    mass = 10 ** 310
+    assert Fuel.step_fuel(mass, step(:launch, :earth)) > 0
+  end
+
   test "Apollo 11 mission" do
     steps = [
       step(:launch, :earth),

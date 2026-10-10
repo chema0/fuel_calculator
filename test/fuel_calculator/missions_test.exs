@@ -16,6 +16,20 @@ defmodule FuelCalculator.MissionsTest do
       assert {:error, invalid_changeset} = Missions.calculate_fuel(changeset)
       assert Keyword.has_key?(invalid_changeset.errors, :mass)
     end
+
+    test "preserves the numeric order of more than ten flight steps" do
+      steps =
+        0..10
+        |> Map.new(fn index ->
+          planet = if(index == 10, do: "mars", else: "earth")
+          {Integer.to_string(index), %{"action" => "launch", "planet" => planet}}
+        end)
+
+      changeset = Missions.change_mission(%{"mass" => "1000", "steps" => steps})
+      {:ok, mission} = Ecto.Changeset.apply_action(changeset, :validate)
+
+      assert Enum.map(mission.steps, & &1.planet) == List.duplicate(:earth, 10) ++ [:mars]
+    end
   end
 
   defp valid_attrs do

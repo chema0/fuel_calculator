@@ -51,10 +51,10 @@ defmodule FuelCalculatorWeb.MissionLive do
     params = Map.put_new(params, "steps", %{})
     changeset = Missions.change_mission(params)
 
-    total =
+    {total, changeset} =
       case Missions.calculate_fuel(changeset) do
-        {:ok, fuel} -> fuel
-        {:error, _changeset} -> nil
+        {:ok, fuel} -> {fuel, changeset}
+        {:error, invalid_changeset} -> {nil, invalid_changeset}
       end
 
     socket
