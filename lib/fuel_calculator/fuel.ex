@@ -15,7 +15,9 @@ defmodule FuelCalculator.Fuel do
   """
   @spec calculate_total(pos_integer(), [Step.t()]) :: non_neg_integer()
   def calculate_total(mass, steps) do
-    Enum.reduce(Enum.reverse(steps), 0, fn step, fuel_for_later_steps ->
+    steps
+    |> Enum.reverse()
+    |> Enum.reduce(0, fn step, fuel_for_later_steps ->
       fuel_for_later_steps + step_fuel(mass + fuel_for_later_steps, step)
     end)
   end
