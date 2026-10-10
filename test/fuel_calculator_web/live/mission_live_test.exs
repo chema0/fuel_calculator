@@ -26,20 +26,20 @@ defmodule FuelCalculatorWeb.MissionLiveTest do
   test "updates the estimate when the path changes", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 
-    view
-    |> form("#mission-form",
-      mission: %{
-        mass: "14606",
-        steps: %{
-          "0" => %{action: "launch", planet: "earth"},
-          "1" => %{action: "land", planet: "mars"},
-          "2" => %{action: "launch", planet: "mars"},
-          "3" => %{action: "land", planet: "earth"}
+    render_change(view, "validate", %{
+      "mission" => %{
+        "mass" => "14606",
+        "steps" => %{
+          "0" => %{"action" => "launch", "planet" => "earth"},
+          "1" => %{"action" => "land", "planet" => "mars"},
+          "2" => %{"action" => "launch", "planet" => "mars"},
+          "3" => %{"action" => "land", "planet" => "earth"}
         }
       }
-    )
-    |> render_change()
+    })
 
+    assert has_element?(view, "#step-planet-1[value='mars']")
+    assert has_element?(view, "#step-planet-1-trigger", "Mars")
     assert has_element?(view, "#fuel-total", "33,388")
   end
 

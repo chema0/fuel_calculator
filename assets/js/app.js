@@ -25,6 +25,93 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/fuel_calculator"
 import topbar from "../vendor/topbar"
 
+// Mission menus use rendered options so they can open below their trigger.
+function closeMissionSelect(dropdown, restoreFocus = false) {
+  const menu = dropdown.querySelector("[data-select-menu]")
+  const trigger = dropdown.querySelector("[data-select-trigger]")
+  menu.hidden = true
+  trigger.setAttribute("aria-expanded", "false")
+  if (restoreFocus) trigger.focus()
+}
+
+function openMissionSelect(dropdown, focusOption = false, lastOption = false) {
+  document.querySelectorAll("[data-mission-select]").forEach(other => {
+    if (other !== dropdown) closeMissionSelect(other)
+  })
+
+  const menu = dropdown.querySelector("[data-select-menu]")
+  menu.hidden = false
+  dropdown.querySelector("[data-select-trigger]").setAttribute("aria-expanded", "true")
+
+  if (focusOption) {
+    const options = [...menu.querySelectorAll("[data-select-option]")]
+    const selected = options.find(option => option.getAttribute("aria-selected") === "true")
+    const target = lastOption ? options.at(-1) : selected || options[0]
+    target?.focus()
+  }
+}
+
+document.addEventListener("click", event => {
+  const dropdown = event.target.closest("[data-mission-select]")
+  const trigger = event.target.closest("[data-select-trigger]")
+  const option = event.target.closest("[data-select-option]")
+
+  if (trigger && dropdown) {
+    if (dropdown.querySelector("[data-select-menu]").hidden) {
+      openMissionSelect(dropdown)
+    } else {
+      closeMissionSelect(dropdown)
+    }
+  } else if (option && dropdown) {
+    const input = dropdown.querySelector('input[type="hidden"]')
+    input.value = option.dataset.selectValue
+    dropdown.querySelector("[data-select-value]").textContent = option.textContent.trim()
+    dropdown.querySelectorAll("[data-select-option]").forEach(item => {
+      item.setAttribute("aria-selected", String(item === option))
+    })
+    input.dispatchEvent(new Event("change", {bubbles: true}))
+    closeMissionSelect(dropdown, true)
+  } else {
+    document.querySelectorAll("[data-mission-select]").forEach(other => closeMissionSelect(other))
+  }
+})
+
+document.addEventListener("keydown", event => {
+  const dropdown = event.target.closest("[data-mission-select]")
+  if (!dropdown) return
+
+  const trigger = dropdown.querySelector("[data-select-trigger]")
+  const menu = dropdown.querySelector("[data-select-menu]")
+  const options = [...menu.querySelectorAll("[data-select-option]")]
+
+  if (event.key === "Escape" && !menu.hidden) {
+    event.preventDefault()
+    closeMissionSelect(dropdown, true)
+  } else if (event.target === trigger && ["ArrowDown", "ArrowUp"].includes(event.key)) {
+    event.preventDefault()
+    openMissionSelect(dropdown, true, event.key === "ArrowUp")
+  } else if (event.target.matches("[data-select-option]")) {
+    const index = options.indexOf(event.target)
+    const next = {
+      ArrowDown: Math.min(index + 1, options.length - 1),
+      ArrowUp: Math.max(index - 1, 0),
+      Home: 0,
+      End: options.length - 1,
+    }[event.key]
+
+    if (next !== undefined) {
+      event.preventDefault()
+      options[next].focus()
+    }
+  }
+})
+
+document.addEventListener("focusin", event => {
+  document.querySelectorAll("[data-mission-select]").forEach(dropdown => {
+    if (!dropdown.contains(event.target)) closeMissionSelect(dropdown)
+  })
+})
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
@@ -80,4 +167,3 @@ if (process.env.NODE_ENV === "development") {
     window.liveReloader = reloader
   })
 }
-

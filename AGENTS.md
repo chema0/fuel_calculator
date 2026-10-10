@@ -5,6 +5,10 @@ This is a web application written using the Phoenix web framework.
 - Use `mix precommit` alias when you are done with all changes and fix any pending issues
 - Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps
 
+### Project skills
+
+Codex discovers the project-local Elixir and Phoenix skills in `.agents/skills/`. These link to the same skill files used by Claude in `.claude/skills/`. Read the relevant skill for Elixir, LiveView, Ecto embedded schemas, tests, or other work in its area. These project instructions and the actual app structure take precedence over generic skill examples. This calculator has no database, Repo, Oban, or authentication.
+
 ### Phoenix v1.8 guidelines
 
 - **Always** begin your LiveView templates with `<Layouts.app flash={@flash} ...>` which wraps all inner content
