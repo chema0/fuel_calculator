@@ -33,6 +33,39 @@
     aria-label="Mission calculator"
   >
     <div class="min-w-0 px-5 pt-7 pb-8 sm:px-8 lg:px-11 lg:pt-9 lg:pb-12">
+      <section
+        class="mb-9 rounded-sm border border-[#d6e3e8] bg-[#f3f8fa] p-4 sm:p-5"
+        aria-labelledby="samples-heading"
+      >
+        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="samples-heading" class="m-0 text-sm font-bold tracking-[-.02em] text-[#152237]">
+            Try a sample mission
+          </h2>
+          <p class="m-0 text-xs text-[#5e6c79]">Load a route, then make it your own.</p>
+        </div>
+        <div class="grid gap-2 sm:grid-cols-3">
+          <button
+            :for={sample <- @samples}
+            id={"sample-#{sample.id}"}
+            type="button"
+            phx-click="load_sample"
+            phx-value-sample={sample.id}
+            aria-pressed={to_string(@selected_sample == sample.id)}
+            class={[
+              "group flex min-h-16 flex-col justify-center rounded-sm border px-3 py-2 text-left transition duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b9aad]",
+              @selected_sample == sample.id &&
+                "border-[#317488] bg-[#e1f1f3] shadow-[inset_0_0_0_1px_#317488]",
+              @selected_sample != sample.id &&
+                "border-[#bdcdd5] bg-white hover:-translate-y-0.5 hover:border-[#317488] hover:shadow-sm"
+            ]}
+          >
+            <span class="text-sm font-bold text-[#152237]">{sample.name}</span>
+            <span class="mt-0.5 text-[.68rem] text-[#536472]">
+              {length(sample.steps)} maneuvers · {sample.mass} kg
+            </span>
+          </button>
+        </div>
+      </section>
       <.form for={@form} id="mission-form" phx-change="validate">
         <section class="border-b border-[#cdd7dd] pb-10" aria-labelledby="mass-heading">
           <div class="mb-6 flex items-end justify-between gap-4">

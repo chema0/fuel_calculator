@@ -14,6 +14,40 @@ defmodule FuelCalculatorWeb.MissionLiveTest do
     assert has_element?(view, "#fuel-total", "51,898")
   end
 
+  test "loads each sample through the editable calculator", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    for {sample, mass, final_step, total} <- [
+          {"apollo", "28801", 3, "51,898"},
+          {"mars", "14606", 3, "33,388"},
+          {"passenger", "75432", 5, "212,161"}
+        ] do
+      view |> element("#sample-#{sample}") |> render_click()
+
+      assert has_element?(view, "#sample-#{sample}[aria-pressed='true']")
+      assert has_element?(view, "#spacecraft-mass[value='#{mass}']")
+      assert has_element?(view, "#flight-step-#{final_step}")
+      refute has_element?(view, "#flight-step-#{final_step + 1}")
+      assert has_element?(view, "#fuel-total", total)
+    end
+
+    refute has_element?(view, "select#step-planet-1 option[value='mars'][selected]")
+    assert has_element?(view, "select#step-planet-3 option[value='mars'][selected]")
+  end
+
+  test "editing a sample clears its selection", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    view |> element("#sample-mars") |> render_click()
+
+    view
+    |> form("#mission-form", mission: %{mass: "15000"})
+    |> render_change()
+
+    refute has_element?(view, "#sample-mars[aria-pressed='true']")
+    assert has_element?(view, "#spacecraft-mass[value='15000']")
+  end
+
   test "updates the estimate when the mass changes", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 

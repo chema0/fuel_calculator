@@ -4,33 +4,84 @@ defmodule FuelCalculatorWeb.MissionLive do
   alias FuelCalculator.Missions
   import FuelCalculatorWeb.MissionComponents
 
-  @apollo_steps [
-    %{"action" => "launch", "planet" => "earth"},
-    %{"action" => "land", "planet" => "moon"},
-    %{"action" => "launch", "planet" => "moon"},
-    %{"action" => "land", "planet" => "earth"}
+  @samples [
+    %{
+      id: "apollo",
+      name: "Apollo 11",
+      mass: "28801",
+      steps: [
+        %{"action" => "launch", "planet" => "earth"},
+        %{"action" => "land", "planet" => "moon"},
+        %{"action" => "launch", "planet" => "moon"},
+        %{"action" => "land", "planet" => "earth"}
+      ]
+    },
+    %{
+      id: "mars",
+      name: "Mars mission",
+      mass: "14606",
+      steps: [
+        %{"action" => "launch", "planet" => "earth"},
+        %{"action" => "land", "planet" => "mars"},
+        %{"action" => "launch", "planet" => "mars"},
+        %{"action" => "land", "planet" => "earth"}
+      ]
+    },
+    %{
+      id: "passenger",
+      name: "Passenger ship",
+      mass: "75432",
+      steps: [
+        %{"action" => "launch", "planet" => "earth"},
+        %{"action" => "land", "planet" => "moon"},
+        %{"action" => "launch", "planet" => "moon"},
+        %{"action" => "land", "planet" => "mars"},
+        %{"action" => "launch", "planet" => "mars"},
+        %{"action" => "land", "planet" => "earth"}
+      ]
+    }
   ]
 
   @impl true
   def mount(_params, _session, socket) do
-    params = %{"mass" => "28801", "steps" => index_steps(@apollo_steps)}
+    apollo = hd(@samples)
 
     {:ok,
      socket
      |> assign(:page_title, "Mission fuel calculator")
-     |> assign_mission(params)}
+     |> assign(:samples, @samples)
+     |> assign(:selected_sample, apollo.id)
+     |> assign_mission(sample_params(apollo))}
   end
 
   @impl true
   def handle_event("validate", %{"mission" => params}, socket) do
-    {:noreply, assign_mission(socket, params)}
+    {:noreply, socket |> assign(:selected_sample, nil) |> assign_mission(params)}
+  end
+
+  @impl true
+  def handle_event("load_sample", %{"sample" => sample_id}, socket) do
+    case Enum.find(@samples, &(&1.id == sample_id)) do
+      nil ->
+        {:noreply, socket}
+
+      sample ->
+        {:noreply,
+         socket
+         |> assign(:selected_sample, sample.id)
+         |> assign_mission(sample_params(sample))}
+    end
   end
 
   @impl true
   def handle_event("add_step", _params, socket) do
     params = socket.assigns.params
     steps = ordered_steps(params) ++ [%{"action" => "launch", "planet" => "earth"}]
-    {:noreply, assign_mission(socket, Map.put(params, "steps", index_steps(steps)))}
+
+    {:noreply,
+     socket
+     |> assign(:selected_sample, nil)
+     |> assign_mission(Map.put(params, "steps", index_steps(steps)))}
   end
 
   @impl true
@@ -44,8 +95,14 @@ defmodule FuelCalculatorWeb.MissionLive do
       |> Enum.reject(fn {_step, position} -> Integer.to_string(position) == index end)
       |> Enum.map(&elem(&1, 0))
 
-    {:noreply, assign_mission(socket, Map.put(params, "steps", index_steps(steps)))}
+    {:noreply,
+     socket
+     |> assign(:selected_sample, nil)
+     |> assign_mission(Map.put(params, "steps", index_steps(steps)))}
   end
+
+  defp sample_params(sample),
+    do: %{"mass" => sample.mass, "steps" => index_steps(sample.steps)}
 
   defp assign_mission(socket, params) do
     params = Map.put_new(params, "steps", %{})
