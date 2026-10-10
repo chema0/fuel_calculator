@@ -21,8 +21,7 @@ defmodule FuelCalculatorWeb.MissionLiveTest do
     |> form("#mission-form", mission: %{mass: "14606"})
     |> render_change()
 
-    refute has_element?(view, "#fuel-total", "51,898")
-    assert has_element?(view, "#fuel-total")
+    assert has_element?(view, "#fuel-total", "25,765")
   end
 
   test "updates the estimate when the path changes", %{conn: conn} do

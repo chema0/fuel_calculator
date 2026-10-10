@@ -18,7 +18,7 @@ defmodule FuelCalculator.FuelTest do
     assert Fuel.step_fuel(83, step(:launch, :earth)) == 1
   end
 
-  test "a very large mass does not lose precision or overflow a float" do
+  test "a very large mass does not overflow a float" do
     mass = 10 ** 310
     assert Fuel.step_fuel(mass, step(:launch, :earth)) > 0
   end
