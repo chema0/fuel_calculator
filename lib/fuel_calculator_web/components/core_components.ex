@@ -237,20 +237,30 @@ defmodule FuelCalculatorWeb.CoreComponents do
     <div class="mb-2">
       <label>
         <span :if={@label} class="mb-1 block text-xs font-medium text-slate-500">{@label}</span>
-        <select
-          id={@id}
-          name={@name}
-          class={[
-            @class ||
-              "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100",
-            @errors != [] && (@error_class || "border-rose-400")
-          ]}
-          multiple={@multiple}
-          {@rest}
-        >
-          <option :if={@prompt} value="">{@prompt}</option>
-          {Phoenix.HTML.Form.options_for_select(@options, @value)}
-        </select>
+        <div class="relative">
+          <select
+            id={@id}
+            name={@name}
+            class={[
+              !@multiple && "appearance-none",
+              @class ||
+                "block h-11 w-full cursor-pointer rounded-sm border border-[#b7c5ce] bg-[#f8fafb] px-2 pr-9 text-sm font-semibold text-[#152237] outline-none transition focus:border-[#317488] focus:ring-3 focus:ring-[#53adbe33] max-sm:text-xs",
+              @errors != [] && (@error_class || "border-rose-400")
+            ]}
+            multiple={@multiple}
+            {@rest}
+          >
+            <option :if={@prompt} value="">{@prompt}</option>
+            {Phoenix.HTML.Form.options_for_select(@options, @value)}
+          </select>
+          <span
+            :if={!@multiple}
+            class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[#152237]"
+            aria-hidden="true"
+          >
+            <.icon name="hero-chevron-down" class="block size-4" />
+          </span>
+        </div>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>

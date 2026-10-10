@@ -35,34 +35,34 @@ defmodule FuelCalculatorWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
-      <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
+    <header class="border-b border-[#cdd7dd]">
+      <div class="mx-auto flex min-h-16 max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:min-h-[76px] lg:px-12">
         <a
           href="/"
-          class="inline-flex items-center gap-3 text-slate-950"
+          class="inline-flex items-center gap-3 text-[1.05rem] font-extrabold tracking-[-.04em] text-[#152237] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#3b9aad]"
           aria-label="Mission Fuel home"
         >
-          <span class="flex size-10 items-center justify-center rounded-xl bg-slate-950 text-teal-300">
-            <.icon name="hero-rocket-launch" class="size-5" />
+          <span
+            class="relative inline-grid size-7 place-items-center rounded-full border-[1.5px] border-[#152237]"
+            aria-hidden="true"
+          >
+            <span class="size-2 rounded-full bg-[#ff835d]"></span>
+            <span class="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-[#152237]"></span>
           </span>
-          <span class="font-display text-lg font-semibold tracking-tight">
-            Mission Fuel<span class="text-teal-600">.</span>
-          </span>
+          <span>Mission Fuel</span>
         </a>
-        <span class="hidden text-xs font-bold uppercase tracking-[0.2em] text-slate-400 sm:block">
-          Interplanetary flight planner
+        <span class="hidden text-xs tracking-wide text-[#5e6c79] sm:inline">
+          A flight planning instrument
         </span>
       </div>
     </header>
 
-    <main class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14 lg:px-10 lg:py-16">
-      <div>
-        {render_slot(@inner_block)}
-      </div>
+    <main class="mx-auto max-w-[1440px] px-4 pb-8 sm:px-6 lg:px-12 lg:pb-20">
+      {render_slot(@inner_block)}
     </main>
 
-    <footer class="mx-auto max-w-7xl px-5 pb-8 text-xs text-slate-400 sm:px-8 lg:px-10">
-      Mission Fuel · Earth / Moon / Mars
+    <footer class="mx-auto max-w-[1440px] border-t border-[#cdd7dd] px-4 py-6 text-xs text-[#5e6c79] sm:px-6 lg:px-12">
+      Mission Fuel / Earth, Moon and Mars
     </footer>
 
     <.flash_group flash={@flash} />
