@@ -1,7 +1,8 @@
 defmodule FuelCalculatorWeb.MissionLive do
   use FuelCalculatorWeb, :live_view
 
-  alias FuelCalculator.{Fuel, Mission}
+  alias FuelCalculator.Missions
+  import FuelCalculatorWeb.MissionComponents
 
   @apollo_steps [
     %{"action" => "launch", "planet" => "earth"},
@@ -48,15 +49,12 @@ defmodule FuelCalculatorWeb.MissionLive do
 
   defp assign_mission(socket, params) do
     params = Map.put_new(params, "steps", %{})
-    changeset = Mission.changeset(%Mission{}, params)
+    changeset = Missions.change_mission(params)
 
     total =
-      case Ecto.Changeset.apply_action(changeset, :validate) do
-        {:ok, %Mission{steps: [_ | _] = steps, mass: mass}} ->
-          Fuel.calculate_total(mass, steps)
-
-        _ ->
-          nil
+      case Missions.calculate_fuel(changeset) do
+        {:ok, fuel} -> fuel
+        {:error, _changeset} -> nil
       end
 
     socket
@@ -83,13 +81,5 @@ defmodule FuelCalculatorWeb.MissionLive do
     steps
     |> Enum.with_index()
     |> Map.new(fn {step, index} -> {Integer.to_string(index), step} end)
-  end
-
-  defp format_number(number) do
-    number
-    |> Integer.to_string()
-    |> String.reverse()
-    |> String.replace(~r/.{3}(?=.)/, "\\0,")
-    |> String.reverse()
   end
 end
