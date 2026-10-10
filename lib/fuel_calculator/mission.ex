@@ -21,6 +21,6 @@ defmodule FuelCalculator.Mission do
     |> cast(attrs, [:mass])
     |> validate_required([:mass])
     |> validate_number(:mass, greater_than: 0)
-    |> cast_embed(:steps, with: &Step.changeset/2)
+    |> cast_embed(:steps, with: &Step.changeset/2, required: true)
   end
 end

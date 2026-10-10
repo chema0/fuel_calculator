@@ -9,6 +9,8 @@ defmodule FuelCalculatorWeb.MissionLiveTest do
     assert has_element?(view, "#mission-form")
     assert has_element?(view, "#spacecraft-mass[value='28801']")
     assert has_element?(view, "#flight-step-3")
+    assert has_element?(view, "select#step-action-0[name='mission[steps][0][action]']")
+    assert has_element?(view, "select#step-planet-0[name='mission[steps][0][planet]']")
     assert has_element?(view, "#fuel-total", "51,898")
   end
 
@@ -26,20 +28,21 @@ defmodule FuelCalculatorWeb.MissionLiveTest do
   test "updates the estimate when the path changes", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 
-    render_change(view, "validate", %{
-      "mission" => %{
-        "mass" => "14606",
-        "steps" => %{
-          "0" => %{"action" => "launch", "planet" => "earth"},
-          "1" => %{"action" => "land", "planet" => "mars"},
-          "2" => %{"action" => "launch", "planet" => "mars"},
-          "3" => %{"action" => "land", "planet" => "earth"}
+    view
+    |> form("#mission-form",
+      mission: %{
+        mass: "14606",
+        steps: %{
+          "0" => %{action: "launch", planet: "earth"},
+          "1" => %{action: "land", planet: "mars"},
+          "2" => %{action: "launch", planet: "mars"},
+          "3" => %{action: "land", planet: "earth"}
         }
       }
-    })
+    )
+    |> render_change()
 
-    assert has_element?(view, "#step-planet-1[value='mars']")
-    assert has_element?(view, "#step-planet-1-trigger", "Mars")
+    assert has_element?(view, "select#step-planet-1 option[value='mars'][selected]")
     assert has_element?(view, "#fuel-total", "33,388")
   end
 

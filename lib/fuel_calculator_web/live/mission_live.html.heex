@@ -112,15 +112,17 @@
                   </span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 border-b border-[#e0e7eb] pb-5 sm:gap-3 [&>div]:mb-0">
-                  <.mission_select
+                  <.input
                     field={step_form[:action]}
                     id={"step-action-#{step_form.index}"}
+                    type="select"
                     label="Maneuver"
                     options={[Launch: :launch, Land: :land]}
                   />
-                  <.mission_select
+                  <.input
                     field={step_form[:planet]}
                     id={"step-planet-#{step_form.index}"}
+                    type="select"
                     label="At"
                     options={[Earth: :earth, Moon: :moon, Mars: :mars]}
                   />
